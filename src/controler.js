@@ -1,0 +1,1 @@
+GET https://api.polygon.io/v1/meta/symbols/{SMCI}/company?apiKey=AK4SM8VMVXTPSZEXHPGV
