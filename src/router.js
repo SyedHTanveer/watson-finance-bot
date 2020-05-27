@@ -1,10 +1,9 @@
 import { Router } from 'express';
+import * as Watson from './controller/watson_controller';
 
 const router = Router();
 
-router.get('/', (req, res) => {
-  res.redirect('https://google.com/');
-});
+router.post('/', Watson.handleQuestion);
 
 
 export default router;
