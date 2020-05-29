@@ -52,7 +52,7 @@ export const handleQuestion = (req, res) => {
           result.data.tickers.forEach((stock, i) => {
             if (i < 10) {
               response[`stock${i}`] = stock.ticker;
-              response[`pch${i}`] = stock.todaysChangePerc;
+              response[`pch${i}`] = stock.todaysChangePerc.toFixed(2);
             }
           });
           // TODO: add sentiment biggest gainers here
