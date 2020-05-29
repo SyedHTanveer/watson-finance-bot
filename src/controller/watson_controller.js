@@ -10,7 +10,7 @@ export const handleQuestion = (req, res) => {
     case 'stock':
       axios.get(`https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers/${req.body.ticker}?apiKey=${process.env.POLYGON_API_KEY}`)
         .then((result) => {
-          response.pch = result.data.ticker.todaysChangePerc;
+          response.pch = (result.data.ticker.todaysChangePerc * 100).toFixed(2);
           response.volume = result.data.ticker.day.v;
           response.price = result.data.ticker.lastQuote.p;
           return axios.get(`https://api.polygon.io/v1/meta/symbols/AAPL/news?perpage=5&apiKey=${process.env.POLYGON_API_KEY}`);
