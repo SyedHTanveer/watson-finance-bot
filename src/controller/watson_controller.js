@@ -22,7 +22,7 @@ export const handleQuestion = (req, res) => {
           response.pch = pch.toFixed(2);
           response.volume = (result.data.results[0].v / 1000).toFixed(1);
           response.price = prevClose;
-          return axios.get(`https://api.polygon.io/v1/meta/symbols/AAPL/news?perpage=5&apiKey=${process.env.POLYGON_API_KEY}`);
+          return axios.get(`https://api.polygon.io/v1/meta/symbols/${req.body.ticker}/news?perpage=5&apiKey=${process.env.POLYGON_API_KEY}`);
         })
         .then((result) => {
           result.data.forEach((newsArticle, i) => {
