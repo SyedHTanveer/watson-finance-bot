@@ -4,6 +4,5 @@ import * as Watson from './controller/watson_controller';
 const router = Router();
 
 router.post('/', Watson.handleQuestion);
-router.post('/discovery', Watson.handleDiscovery);
 
 export default router;

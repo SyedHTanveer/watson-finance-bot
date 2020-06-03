@@ -7,35 +7,6 @@ import moment from 'moment';
 
 dotenv.config({ silent: true });
 
-
-export const handleDiscovery = (req, res) => {
-  const year = moment().year();
-  const month = moment().month();
-  const day = moment().date();
-  console.log(`${year}-${month}-${day}`);
-  const discovery = new DiscoveryV1({
-    version: '2019-04-30',
-    authenticator: new IamAuthenticator({ apikey: process.env.DISCOVERY_API_KEY }),
-    url: process.env.DISCOVERY_URL,
-  });
-
-  const queryParams = {
-    environmentId: 'system',
-    collectionId: 'news-en',
-    query: `enriched_text.keywords.text::${req.body.company},publication_date::"${`${year}-${month}-${day}`}"`,
-    _return: 'title, url, enriched_text.sentiment',
-    count: 5,
-  };
-
-  discovery.query(queryParams)
-    .then((queryResponse) => {
-      res.send(JSON.stringify(queryResponse, null, 2));
-    })
-    .catch((err) => {
-      console.log('error:', err);
-    });
-};
-
 // eslint-disable-next-line import/prefer-default-export
 export const handleQuestion = (req, res) => {
   const response = {};
@@ -101,6 +72,42 @@ export const handleQuestion = (req, res) => {
         .catch((error) => {
           console.log(error);
           res.status(500).json(error);
+        });
+      break;
+    case 'discovery':
+      const year = moment().year();
+      const month = moment().month();
+      const day = moment().date();
+      const discovery = new DiscoveryV1({
+        version: '2019-04-30',
+        authenticator: new IamAuthenticator({ apikey: process.env.DISCOVERY_API_KEY }),
+        url: process.env.DISCOVERY_URL,
+      });
+
+      const queryParams = {
+        environmentId: 'system',
+        collectionId: 'news-en',
+        query: `enriched_text.keywords.text::${req.body.company},publication_date::"${`${year}-${month}-${day}`}"`,
+        _return: 'title, url, enriched_text.sentiment',
+        count: 5,
+      };
+
+      discovery.query(queryParams)
+        .then((queryResponse) => {
+          queryResponse.result.results.forEach((news, i) => {
+            const { title } = news;
+            const { url } = news;
+            const { label } = news.enriched_text.sentiment.document;
+            response[`news${i + 1}`] = {
+              title,
+              url,
+              label,
+            };
+          });
+          res.send(response);
+        })
+        .catch((err) => {
+          console.log('error:', err);
         });
       break;
     default:
