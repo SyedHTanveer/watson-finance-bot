@@ -1,12 +1,18 @@
+/* eslint-disable no-case-declarations */
 import axios from 'axios';
 import dotenv from 'dotenv';
 import DiscoveryV1 from 'ibm-watson/discovery/v1';
 import { IamAuthenticator } from 'ibm-watson/auth';
+import moment from 'moment';
 
 dotenv.config({ silent: true });
 
 
 export const handleDiscovery = (req, res) => {
+  const year = moment().year();
+  const month = moment().month();
+  const day = moment().date();
+  console.log(`${year}-${month}-${day}`);
   const discovery = new DiscoveryV1({
     version: '2019-04-30',
     authenticator: new IamAuthenticator({ apikey: process.env.DISCOVERY_API_KEY }),
@@ -16,7 +22,7 @@ export const handleDiscovery = (req, res) => {
   const queryParams = {
     environmentId: 'system',
     collectionId: 'news-en',
-    query: `enriched_text.keywords.text::${req.body.company},publication_date::"2020-06-02"`,
+    query: `enriched_text.keywords.text::${req.body.company},publication_date::"${`${year}-${month}-${day}`}"`,
     _return: 'title, url, enriched_text.sentiment',
     count: 5,
   };
@@ -35,12 +41,19 @@ export const handleQuestion = (req, res) => {
   const response = {};
   switch (req.body.question) {
     case 'stock':
-      axios.get(`https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers/${req.body.ticker}?apiKey=${process.env.POLYGON_API_KEY}`)
+      const end = moment().format('YYYY-MM-DD');
+      const start = moment().subtract(1, 'week').format('YYYY-MM-DD');
+      console.log(`https://api.polygon.io/v2/aggs/ticker/${req.body.ticker}/range/1/day/${start}/${end}?sort=desc&apiKey=${process.env.POLYGON_API_KEY}`);
+      axios.get(`https://api.polygon.io/v2/aggs/ticker/${req.body.ticker}/range/1/day/${start}/${end}?sort=desc&apiKey=${process.env.POLYGON_API_KEY}`)
         .then((result) => {
-          response.pch = result.data.ticker.todaysChangePerc.toFixed(2);
-          response.volume = (result.data.ticker.day.v / 1000).toFixed(1);
-          response.price = result.data.ticker.lastQuote.p;
-          return axios.get(`https://api.polygon.io/v1/meta/symbols/AAPL/news?perpage=5&apiKey=${process.env.POLYGON_API_KEY}`);
+          console.log(result);
+          const prevClose = result.data.results[0].c;
+          const prevPrevClose = result.data.results[1].c;
+          const pch = (prevClose - prevPrevClose) / prevPrevClose * 100;
+          response.pch = pch.toFixed(2);
+          response.volume = (result.data.results[0].v / 1000).toFixed(1);
+          response.price = prevClose;
+          return axios.get(`https://api.polygon.io/v1/meta/symbols/${req.body.ticker}/news?perpage=5&apiKey=${process.env.POLYGON_API_KEY}`);
         })
         .then((result) => {
           result.data.forEach((newsArticle, i) => {
