@@ -1,7 +1,34 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
+import DiscoveryV1 from 'ibm-watson/discovery/v1';
+import { IamAuthenticator } from 'ibm-watson/auth';
 
 dotenv.config({ silent: true });
+
+
+export const handleDiscovery = (req, res) => {
+  const discovery = new DiscoveryV1({
+    version: '2019-04-30',
+    authenticator: new IamAuthenticator({ apikey: process.env.DISCOVERY_API_KEY }),
+    url: process.env.DISCOVERY_URL,
+  });
+
+  const queryParams = {
+    environmentId: 'system',
+    collectionId: 'news-en',
+    query: `enriched_text.keywords.text::${req.body.company},publication_date::"2020-06-02"`,
+    _return: 'title, url, enriched_text.sentiment',
+    count: 5,
+  };
+
+  discovery.query(queryParams)
+    .then((queryResponse) => {
+      res.send(JSON.stringify(queryResponse, null, 2));
+    })
+    .catch((err) => {
+      console.log('error:', err);
+    });
+};
 
 // eslint-disable-next-line import/prefer-default-export
 export const handleQuestion = (req, res) => {
