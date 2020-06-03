@@ -10,4 +10,4 @@ in order to build the server, simply run the command `yarn install` in the root 
 Simply type `yarn start` in the root of this repository to get a local instance of this server running at `http://localhost:9090`
 
 ### Testing the server
-This server has one primary endpoint which can be accessed via a POST request at `http://localhost:9090/api`. All post requests at this endpoint require a 'question' field to be passed, and some questions require a 'stock' field to be passed as well. See `question_controller.js` to see what types of requests this endpoint handles.
+This server has one primary endpoint which can be accessed via a POST request at `http://localhost:9090/api`. All post requests at this endpoint require a 'question' field to be passed, and some questions require a 'stock' field to be passed as well. See `watson_controller.js` to see what types of requests this endpoint handles.
