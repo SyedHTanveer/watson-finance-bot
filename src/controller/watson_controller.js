@@ -98,7 +98,7 @@ export const handleQuestion = (req, res) => {
             const { title } = news;
             const { url } = news;
             const { label } = news.enriched_text.sentiment.document;
-            response[`news${i + 1}`] = {
+            response[`news${i}`] = {
               title,
               url,
               label,
